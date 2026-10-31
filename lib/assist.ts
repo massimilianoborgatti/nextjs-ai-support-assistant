@@ -1,4 +1,4 @@
-import { retrieve } from './retrieval';
+import { searchFaq } from './retrieval';
 import { isInjection } from './prompt';
 import { mockGenerator } from './generators/mock';
 import { createRateLimit } from './rate-limit';
@@ -39,10 +39,12 @@ export function createAssistHandler(
       request.signal.removeEventListener('abort', onAbort);
       controller.signal.removeEventListener('abort', rejectAbort);
     };
-    const entries = retrieve(question as string);
+    const result = searchFaq(question as string);
+    const entries = result.kind === 'match' ? result.entries : [];
+    const choices = result.kind === 'ambiguous' ? result.choices : undefined;
     const selected = !entries.length || isInjection(question as string) ? mockGenerator : generator;
     const iterator = selected
-      .generate({ question: question as string, entries, signal: controller.signal })
+      .generate({ question: question as string, entries, choices, signal: controller.signal })
       [Symbol.asyncIterator]();
     const next = () => Promise.race([iterator.next(), aborted]);
     try {

@@ -32,3 +32,23 @@ it('limits input and reports generator failure', async () => {
   expect(await screen.findByRole('alert')).toHaveTextContent('Unable to answer');
   expect(screen.getByRole('alert')).not.toHaveTextContent('private detail');
 });
+
+it('offers two clarification buttons and asks the selected question', async () => {
+  render(<ChatPanel generator={createMockGenerator(0)} />);
+  fireEvent.change(screen.getByLabelText('Your question'), {
+    target: { value: 'Tell me about delivery' },
+  });
+  fireEvent.click(screen.getByRole('button', { name: /Send question/ }));
+  expect(await screen.findByText('Did you mean…')).toBeVisible();
+  const region = screen.getByLabelText('Clarify your question');
+  const buttons = region.querySelectorAll('button');
+  expect(buttons).toHaveLength(2);
+  const title = buttons[0].textContent!;
+  await waitFor(() => expect(buttons[0]).toBeEnabled());
+  fireEvent.click(buttons[0]);
+  await waitFor(() =>
+    expect(screen.getAllByTestId('answer').at(-1)).toHaveTextContent('According to our'),
+  );
+  expect(screen.getByText(title, { selector: '.question p' })).toBeVisible();
+  expect(screen.getAllByTestId('answer')[0]).not.toHaveTextContent('not covered');
+});

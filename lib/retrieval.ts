@@ -29,7 +29,6 @@ export function tokens(text: string) {
     text
       .toLowerCase()
       .replace(/\bpick[ -]+up\b/g, 'pickup')
-      .replace(/\bhow much\b/g, 'cost')
       .match(/[a-z0-9]+/g) ?? [];
   return [
     ...new Set(
@@ -42,7 +41,9 @@ export function tokens(text: string) {
     ),
   ];
 }
-export function retrieve(question: string, entries: Faq[] = faq): Faq[] {
+export type RetrievalResult =
+  { kind: 'match'; entries: Faq[] } | { kind: 'ambiguous'; choices: Faq[] } | { kind: 'none' };
+export function searchFaq(question: string, entries: Faq[] = faq): RetrievalResult {
   const query = tokens(question);
   const indexed = entries.map((entry) => ({
     entry,
@@ -52,8 +53,10 @@ export function retrieve(question: string, entries: Faq[] = faq): Faq[] {
   }));
   const scored = indexed
     .map(({ entry, title, tags, body }) => {
-      // Safety is contextual: generic payment safety must not retrieve animal care.
-      if (entry.id === 'care-05' && !query.includes('pet'))
+      if (
+        entry.requires?.length &&
+        !tokens(entry.requires.join(' ')).some((term) => query.includes(term))
+      )
         return { entry, score: 0, strong: 0, matched: [] as string[] };
       let strong = 0;
       const matched: string[] = [];
@@ -78,11 +81,22 @@ export function retrieve(question: string, entries: Faq[] = faq): Faq[] {
     .sort((a, b) => b.score - a.score || a.entry.id.localeCompare(b.entry.id));
   const best = scored[0],
     second = scored[1];
-  if (best && second && best.strong === 1 && best.matched.join() === second.matched.join())
-    return [];
-  if (!best || (second && best.score - second.score < Math.max(2, best.score * 0.15))) return [];
-  return scored
-    .filter((item) => item.score >= best.score * 0.6)
-    .slice(0, 3)
-    .map((item) => item.entry);
+  if (!best) return { kind: 'none' };
+  if (
+    second &&
+    ((best.strong === 1 && best.matched.join() === second.matched.join()) ||
+      best.score - second.score < Math.max(2, best.score * 0.15))
+  )
+    return { kind: 'ambiguous', choices: [best.entry, second.entry] };
+  return {
+    kind: 'match',
+    entries: scored
+      .filter((item) => item.score >= best.score * 0.6)
+      .slice(0, 3)
+      .map((item) => item.entry),
+  };
+}
+export function retrieve(question: string, entries: Faq[] = faq): Faq[] {
+  const result = searchFaq(question, entries);
+  return result.kind === 'match' ? result.entries : [];
 }

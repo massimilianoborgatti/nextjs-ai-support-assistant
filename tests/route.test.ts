@@ -60,3 +60,22 @@ it('sanitizes provider failures', async () => {
   expect(response.status).toBe(502);
   expect(await response.text()).not.toContain('private');
 });
+
+it('streams clarification choices without using the provider on ambiguous input', async () => {
+  const generate = vi.fn(() => {
+    throw Error('Provider must not be used');
+  });
+  const response = await createAssistHandler({ generate })(request('Tell me about delivery'));
+  const events = (await response.text())
+    .trim()
+    .split('\n')
+    .map((line) => JSON.parse(line));
+  expect(
+    events
+      .filter((event) => event.type === 'text')
+      .map((event) => event.text)
+      .join(''),
+  ).toBe('Did you mean…');
+  expect(events.find((event) => event.type === 'clarification').choices).toHaveLength(2);
+  expect(generate).not.toHaveBeenCalled();
+});

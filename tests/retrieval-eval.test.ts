@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { retrieve, tokens } from '../lib/retrieval';
+import { retrieve, tokens, searchFaq } from '../lib/retrieval';
 import { isInjection } from '../lib/prompt';
 import { createMockGenerator } from '../lib/generators/mock';
 const cases: [string, string][] = [
@@ -33,6 +33,20 @@ const cases: [string, string][] = [
   ['Is it safe?', 'none'],
   ['Tell me about delivery', 'none'],
   ['Can I pick up?', 'none'],
+  ['How much light does a monstera need?', 'care-02'],
+  ['How much water does the plant need?', 'care-01'],
+  ['How much fertilizer should I use?', 'none'],
+  ['When will my order arrive?', 'ship-01'],
+  ['Do you deliver to Germany?', 'ship-03'],
+  ['I want to send a plant back', 'return-01'],
+  ['Can I add a plant to my order?', 'order-01'],
+  ['Can I write a card for the gift?', 'gift-02'],
+  ['How do I reach customer service?', 'contact-01'],
+  ['What is your phone number?', 'contact-01'],
+  ['Can I pick it up today?', 'pickup-02'],
+  ['Can I pay with PayPal?', 'none'],
+  ['Do you sell gift cards?', 'none'],
+  ['Do you have a loyalty program?', 'none'],
 ];
 describe('realistic retrieval evaluation', () => {
   for (const [question, id] of cases)
@@ -84,4 +98,25 @@ it('uses the contact fallback for unsupported payment safety', async () => {
     if (event.type === 'text') answer += event.text;
   expect(answer).toContain('not covered');
   expect(answer).toContain('contact form');
+});
+
+it('uses optional context requirements for any entry without depending on its id', () => {
+  const entry = {
+    id: 'context-example',
+    title: 'Safety',
+    body: 'Contextual answer.',
+    tags: ['safe'],
+    requires: ['pet', 'pickup'],
+  };
+  expect(retrieve('Is it safe?', [entry])).toEqual([]);
+  expect(retrieve('Is it safe for a dog?', [entry])).toEqual([entry]);
+  expect(retrieve('Is it safe for pickup?', [entry])).toEqual([entry]);
+  expect(retrieve('Is it safe?', [{ ...entry, requires: undefined }])).toHaveLength(1);
+  expect(retrieve('Is it safe?', [{ ...entry, requires: [] }])).toHaveLength(1);
+});
+it('distinguishes ambiguity from unrelated input', () => {
+  const result = searchFaq('Tell me about delivery');
+  expect(result.kind).toBe('ambiguous');
+  if (result.kind === 'ambiguous') expect(result.choices).toHaveLength(2);
+  expect(searchFaq('Who won the chess championship?').kind).toBe('none');
 });

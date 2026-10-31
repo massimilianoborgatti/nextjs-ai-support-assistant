@@ -1,11 +1,16 @@
 'use client';
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import faq from '../content/faq.json';
-import { retrieve } from '../lib/retrieval';
+import { searchFaq } from '../lib/retrieval';
 import { mockGenerator } from '../lib/generators/mock';
 import { serverTransport } from '../lib/client';
 import type { AnswerGenerator } from '../lib/types';
-type Message = { question: string; answer: string; sources: string[] };
+type Message = {
+  question: string;
+  answer: string;
+  sources: string[];
+  choices: { id: string; title: string }[];
+};
 const suggestions = [
   'How long does shipping take?',
   'How do I return a plant?',
@@ -32,12 +37,17 @@ export function ChatPanel({
     setBusy(true);
     setError('');
     setQuestion('');
-    setMessages((previous) => [...previous, { question: text.trim(), answer: '', sources: [] }]);
+    setMessages((previous) => [
+      ...previous,
+      { question: text.trim(), answer: '', sources: [], choices: [] },
+    ]);
     try {
       const selected = generator ?? (server ? serverTransport : mockGenerator);
+      const result = searchFaq(text);
       for await (const event of selected.generate({
         question: text.trim(),
-        entries: retrieve(text),
+        entries: result.kind === 'match' ? result.entries : [],
+        choices: result.kind === 'ambiguous' ? result.choices : undefined,
         signal: controller.signal,
       })) {
         if (controller.signal.aborted) break;
@@ -47,7 +57,9 @@ export function ChatPanel({
               ? message
               : event.type === 'text'
                 ? { ...message, answer: message.answer + event.text }
-                : { ...message, sources: event.ids },
+                : event.type === 'sources'
+                  ? { ...message, sources: event.ids }
+                  : { ...message, choices: event.choices },
           ),
         );
       }
@@ -99,6 +111,20 @@ export function ChatPanel({
               <p aria-live="polite" aria-atomic="true" data-testid="answer">
                 {message.answer || 'Finding relevant FAQ entries…'}
               </p>
+              {message.choices.length > 0 && (
+                <div className="suggestions" aria-label="Clarify your question">
+                  {message.choices.map((choice) => (
+                    <button
+                      type="button"
+                      key={choice.id}
+                      disabled={busy}
+                      onClick={() => void send(choice.title)}
+                    >
+                      {choice.title}
+                    </button>
+                  ))}
+                </div>
+              )}
               <div className="sources">
                 {message.sources.map((id) => {
                   const entry = faq.find((entry) => entry.id === id);

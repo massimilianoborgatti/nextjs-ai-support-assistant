@@ -11,14 +11,16 @@
       "duration",
       "shipping time",
       "delivery time",
-      "take"
+      "take",
+      "order arrive"
     ]
   },
   {
     "id": "ship-02",
     "title": "Shipping costs",
     "body": "Standard shipping costs 5 credits per order. Orders of 50 credits or more receive free standard shipping. These are fictional demo prices.",
-    "tags": ["shipping", "cost", "price", "free", "how much", "delivery fee", "delivery"]
+    "tags": ["shipping", "cost", "price", "free", "how much", "delivery fee", "delivery"],
+    "requires": ["shipping", "delivery", "cost", "price", "fee"]
   },
   {
     "id": "ship-03",
@@ -32,7 +34,8 @@
       "abroad",
       "countries",
       "country",
-      "overseas"
+      "overseas",
+      "Germany"
     ]
   },
   {
@@ -45,7 +48,7 @@
     "id": "return-01",
     "title": "Returning a plant",
     "body": "Request a return through the help-center contact form within 14 days of delivery. Keep the plant in its original pot and packaging. The support team explains the next steps before you send anything back.",
-    "tags": ["return", "returns", "plant"]
+    "tags": ["return", "returns", "plant", "send back"]
   },
   {
     "id": "return-02",
@@ -63,7 +66,7 @@
     "id": "order-01",
     "title": "Changing an order",
     "body": "Request an order change before dispatch using the help-center contact form. Include the order reference and requested change. Changes cannot be guaranteed once packing begins.",
-    "tags": ["change", "edit", "order"]
+    "tags": ["change", "edit", "order", "add"]
   },
   {
     "id": "order-02",
@@ -99,19 +102,22 @@
     "id": "care-05",
     "title": "Pet safety",
     "body": "Some plants are unsuitable for homes with pets. Check the care card before placing a plant near animals. If an animal eats a plant, seek professional veterinary advice.",
-    "tags": ["pet", "pets", "safe", "animals", "cat", "dog", "animal", "toxic"]
+    "tags": ["pet", "pets", "safe", "animals", "cat", "dog", "animal", "toxic"],
+    "requires": ["pet"]
   },
   {
     "id": "gift-01",
     "title": "Gift wrapping",
     "body": "Paper gift wrapping costs 2 demo credits per order. Select it before checkout. We cannot add wrapping after dispatch.",
-    "tags": ["gift", "wrapping", "wrap"]
+    "tags": ["gift", "wrapping", "wrap"],
+    "requires": ["wrap"]
   },
   {
     "id": "gift-02",
     "title": "Gift messages",
     "body": "A short gift message can be added before checkout. Keep it under 150 characters. Gift messages are not printed on the outside of the parcel.",
-    "tags": ["gift", "message", "note", "recipient"]
+    "tags": ["gift", "message", "note", "recipient", "write", "card"],
+    "requires": ["write", "message", "note", "recipient"]
   },
   {
     "id": "pickup-01",
@@ -133,13 +139,13 @@
     "id": "pickup-02",
     "title": "Collecting an order",
     "body": "Bring your order reference after receiving the ready-for-pickup notice. Orders are held for seven days. Contact support if you need more time.",
-    "tags": ["pickup", "collect", "collection", "pick up", "where"]
+    "tags": ["pickup", "collect", "collection", "pick up", "where", "today"]
   },
   {
     "id": "contact-01",
     "title": "Contact support",
     "body": "Use the help-center contact form in the shop to reach support. The fictional team replies within two working days. This demo does not submit contact requests or collect personal details.",
-    "tags": ["contact", "support", "help"]
+    "tags": ["contact", "support", "help", "reach", "customer", "service", "phone", "number"]
   },
   {
     "id": "stock-01",
