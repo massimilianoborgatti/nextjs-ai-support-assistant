@@ -13,8 +13,9 @@ it('streams provider deltas and only exposes retrieved citations', async () => {
     (async function* () {
       yield {
         type: 'response.output_text.delta',
-        delta: 'Delivery takes three to five working days. [ship-01] [unknown]',
+        delta: 'Delivery takes three to five working days. [shi',
       };
+      yield { type: 'response.output_text.delta', delta: 'p-01] [unknown]' };
       yield { type: 'response.completed' };
     })(),
   );
@@ -25,6 +26,12 @@ it('streams provider deltas and only exposes retrieved citations', async () => {
     entries: retrieve('shipping times'),
   }))
     events.push(event);
+  const visible = events
+    .filter((event) => event.type === 'text')
+    .map((event) => event.text)
+    .join('');
+  expect(visible).toContain('Delivery takes three to five working days.');
+  expect(visible).not.toContain('[');
   expect(events.at(-1)).toEqual({ type: 'sources', ids: ['ship-01'] });
   expect(create.mock.calls[0][0]).toMatchObject({
     store: false,
@@ -43,8 +50,8 @@ it('does not treat a failed provider stream as a completed answer', async () => 
   await expect(
     (async () => {
       for await (const event of generator.generate({
-        question: 'shipping',
-        entries: retrieve('shipping'),
+        question: 'shipping times',
+        entries: retrieve('shipping times'),
       }))
         void event;
     })(),

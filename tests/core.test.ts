@@ -51,8 +51,8 @@ for (const [question, expected, source] of [
     expect(events.at(-1)).toEqual({ type: 'sources', ids: source ? [source] : [] });
   });
 
-it('orders equally scored entries by id independently of input order', () => {
+it('abstains on equal scores independently of input order', () => {
   const a = { id: 'a', title: 'Delivery', body: 'Local details.', tags: ['delivery'] };
   const b = { ...a, id: 'b' };
-  expect(retrieve('delivery', [b, a]).map((entry) => entry.id)).toEqual(['a', 'b']);
+  expect(retrieve('delivery', [b, a]).map((entry) => entry.id)).toEqual([]);
 });

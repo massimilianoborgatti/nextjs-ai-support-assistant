@@ -3,25 +3,43 @@
     "id": "ship-01",
     "title": "Shipping times",
     "body": "Orders leave Demo Plant Shop within two working days. Delivery then takes three to five working days. We do not dispatch on weekends.",
-    "tags": ["shipping", "delivery", "time", "arrive"]
+    "tags": [
+      "shipping",
+      "delivery",
+      "time",
+      "arrive",
+      "duration",
+      "shipping time",
+      "delivery time",
+      "take"
+    ]
   },
   {
     "id": "ship-02",
     "title": "Shipping costs",
     "body": "Standard shipping costs 5 credits per order. Orders of 50 credits or more receive free standard shipping. These are fictional demo prices.",
-    "tags": ["shipping", "cost", "price", "free"]
+    "tags": ["shipping", "cost", "price", "free", "how much", "delivery fee", "delivery"]
   },
   {
     "id": "ship-03",
     "title": "Delivery area",
     "body": "Demo Plant Shop delivers within the fictional Demo Region. International shipping is not available. Choose pickup if delivery is unavailable.",
-    "tags": ["delivery", "area", "international"]
+    "tags": [
+      "delivery",
+      "area",
+      "international",
+      "ship",
+      "abroad",
+      "countries",
+      "country",
+      "overseas"
+    ]
   },
   {
     "id": "ship-04",
     "title": "Tracking an order",
     "body": "A tracking reference appears in the order summary after dispatch. If it has not updated for five working days, use the help-center contact form. Do not include payment details.",
-    "tags": ["tracking", "track", "parcel"]
+    "tags": ["tracking", "track", "parcel", "reference"]
   },
   {
     "id": "return-01",
@@ -33,13 +51,13 @@
     "id": "return-02",
     "title": "Refund timing",
     "body": "Approved refunds are processed within five working days after the return is checked. The original payment method receives the refund. The payment service may take additional time to display it.",
-    "tags": ["refund", "refunds", "money"]
+    "tags": ["refund", "refunds", "money", "refunded"]
   },
   {
     "id": "return-03",
     "title": "Damaged delivery",
     "body": "If a plant arrives damaged, contact support within two days of delivery. Include the order reference and a description of the damage. Keep the packaging until support replies.",
-    "tags": ["damaged", "broken", "delivery"]
+    "tags": ["damaged", "broken", "delivery", "arrived damaged", "damage"]
   },
   {
     "id": "order-01",
@@ -81,7 +99,7 @@
     "id": "care-05",
     "title": "Pet safety",
     "body": "Some plants are unsuitable for homes with pets. Check the care card before placing a plant near animals. If an animal eats a plant, seek professional veterinary advice.",
-    "tags": ["pet", "pets", "safe", "animals"]
+    "tags": ["pet", "pets", "safe", "animals", "cat", "dog", "animal", "toxic"]
   },
   {
     "id": "gift-01",
@@ -93,19 +111,29 @@
     "id": "gift-02",
     "title": "Gift messages",
     "body": "A short gift message can be added before checkout. Keep it under 150 characters. Gift messages are not printed on the outside of the parcel.",
-    "tags": ["gift", "message", "note"]
+    "tags": ["gift", "message", "note", "recipient"]
   },
   {
     "id": "pickup-01",
     "title": "Pickup opening hours",
     "body": "The fictional Demo Plant Shop pickup point opens Tuesday to Saturday, 10:00–16:00. It is closed on Sunday and Monday. Wait for a ready-for-pickup notice before visiting.",
-    "tags": ["pickup", "opening", "hours", "open"]
+    "tags": [
+      "pickup",
+      "opening",
+      "hours",
+      "open",
+      "Saturday",
+      "Tuesday",
+      "Sunday",
+      "Monday",
+      "closed"
+    ]
   },
   {
     "id": "pickup-02",
     "title": "Collecting an order",
     "body": "Bring your order reference after receiving the ready-for-pickup notice. Orders are held for seven days. Contact support if you need more time.",
-    "tags": ["pickup", "collect", "collection"]
+    "tags": ["pickup", "collect", "collection", "pick up", "where"]
   },
   {
     "id": "contact-01",

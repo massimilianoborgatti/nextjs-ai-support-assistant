@@ -1,38 +1,88 @@
 import faq from '../content/faq.json';
 import type { Faq } from './types';
 const stop = new Set(
-  'a an the is are do does how what when where can i my you your it to of for in on and with about please me much'.split(
+  'a an the is are do does how what when where can could should would i my you your it to of for in on and with about please me someone else as by be have has that this'.split(
     ' ',
   ),
 );
+const forms: Record<string, string> = {};
+for (const [root, variants] of Object.entries({
+  ship: ['ship', 'ships', 'shipping', 'shipped'],
+  deliver: ['deliver', 'delivers', 'delivery', 'deliveries', 'delivered'],
+  open: ['open', 'opens', 'opening'],
+  pay: ['pay', 'pays', 'paying', 'paid', 'payment', 'payments'],
+  cancel: ['cancel', 'cancels', 'cancelling', 'canceling', 'cancelled', 'canceled', 'cancellation'],
+  collect: ['collect', 'collects', 'collecting', 'collected', 'collection'],
+  return: ['return', 'returns', 'returning', 'returned'],
+  change: ['change', 'changes', 'changing', 'changed'],
+  water: ['water', 'waters', 'watering', 'watered'],
+  wrap: ['wrap', 'wraps', 'wrapping', 'wrapped'],
+  damage: ['damage', 'damages', 'damaged', 'broken'],
+  repot: ['repot', 'repotting', 'repotted'],
+  time: ['time', 'times', 'duration', 'long'],
+  cost: ['cost', 'costs', 'price', 'prices', 'fee', 'fees'],
+  pet: ['pet', 'pets', 'animal', 'animals', 'cat', 'cats', 'dog', 'dogs'],
+}))
+  for (const variant of variants) forms[variant] = root;
 export function tokens(text: string) {
+  const words =
+    text
+      .toLowerCase()
+      .replace(/\bpick[ -]+up\b/g, 'pickup')
+      .replace(/\bhow much\b/g, 'cost')
+      .match(/[a-z0-9]+/g) ?? [];
   return [
     ...new Set(
-      (text.toLowerCase().match(/[a-z0-9]+/g) ?? [])
+      words
         .filter((word) => !stop.has(word))
-        .map((word) => (word.length > 4 && word.endsWith('s') ? word.slice(0, -1) : word)),
+        .map(
+          (word) =>
+            forms[word] ?? (word.length > 4 && word.endsWith('s') ? word.slice(0, -1) : word),
+        ),
     ),
   ];
 }
 export function retrieve(question: string, entries: Faq[] = faq): Faq[] {
   const query = tokens(question);
-  return entries
-    .map((entry) => {
-      const title = tokens(entry.title),
-        tags = tokens(entry.tags.join(' ')),
-        body = tokens(entry.body);
-      const score = query.reduce(
-        (sum, word) =>
-          sum +
-          (title.includes(word) ? 4 : 0) +
-          (tags.includes(word) ? 3 : 0) +
-          (body.includes(word) ? 1 : 0),
-        0,
-      );
-      return { entry, score };
+  const indexed = entries.map((entry) => ({
+    entry,
+    title: tokens(entry.title),
+    tags: tokens(entry.tags.join(' ')),
+    body: tokens(entry.body),
+  }));
+  const scored = indexed
+    .map(({ entry, title, tags, body }) => {
+      // Safety is contextual: generic payment safety must not retrieve animal care.
+      if (entry.id === 'care-05' && !query.includes('pet'))
+        return { entry, score: 0, strong: 0, matched: [] as string[] };
+      let strong = 0;
+      const matched: string[] = [];
+      const score = query.reduce((total, word) => {
+        const frequency = indexed.filter(
+          (item) => item.title.includes(word) || item.tags.includes(word),
+        ).length;
+        const specificity = 1 + Math.log((entries.length + 1) / (frequency + 1));
+        const match = title.includes(word) || tags.includes(word);
+        if (match) {
+          strong++;
+          matched.push(word);
+        }
+        return (
+          total +
+          (match ? (title.includes(word) ? 5 : 4) * specificity : body.includes(word) ? 0.25 : 0)
+        );
+      }, 0);
+      return { entry, score, strong, matched };
     })
-    .filter((item) => item.score >= 3)
-    .sort((a, b) => b.score - a.score || a.entry.id.localeCompare(b.entry.id))
+    .filter((item) => item.strong > 0 && item.score >= 4)
+    .sort((a, b) => b.score - a.score || a.entry.id.localeCompare(b.entry.id));
+  const best = scored[0],
+    second = scored[1];
+  if (best && second && best.strong === 1 && best.matched.join() === second.matched.join())
+    return [];
+  if (!best || (second && best.score - second.score < Math.max(2, best.score * 0.15))) return [];
+  return scored
+    .filter((item) => item.score >= best.score * 0.6)
     .slice(0, 3)
     .map((item) => item.entry);
 }

@@ -10,7 +10,7 @@ export function createMockGenerator(delay = 18): AnswerGenerator {
       const text = refused
         ? 'I can help with Demo Plant Shop questions, but cannot follow requests to override the help-center rules.'
         : entry
-          ? `According to our ${entry.title.toLowerCase()}: ${entry.body} [${entry.id}]`
+          ? `According to our ${entry.title.toLowerCase()}: ${entry.body}`
           : notCovered;
       for (const word of text.match(/\S+\s*/g) ?? []) {
         signal?.throwIfAborted();

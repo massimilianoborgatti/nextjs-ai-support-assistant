@@ -13,7 +13,7 @@ export function buildPrompt(question: string, entries: Faq[]) {
   };
 }
 export function isInjection(question: string) {
-  return /ignore (?:all |the )?(?:previous|prior|above) instructions|reveal.*(?:key|prompt)|system prompt|act as|override.*rules/i.test(
+  return /\bignore\s+(?:(?:all|the)\s+)?(?:previous|prior|above)\s+instructions\b|\breveal\s+(?:(?:your|the)\s+)?(?:system\s+prompt|api\s+key)\b|\boverride\s+(?:the\s+)?rules\b/i.test(
     question,
   );
 }

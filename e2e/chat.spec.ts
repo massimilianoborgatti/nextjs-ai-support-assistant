@@ -16,6 +16,7 @@ test('streams grounded answers and source cards without external requests', asyn
   await page.getByRole('button', { name: /How long does shipping/ }).click();
   await expect(page.getByTestId('answer')).toContainText('According');
   await expect(page.getByText('ship-01', { exact: true })).toBeVisible();
+  await expect(page.getByTestId('answer')).not.toContainText('[ship-01]');
   await page.getByText('↗ Shipping times').click();
   await expect(page.locator('details p')).toContainText('three to five working days');
   await page.getByLabel('Your question').fill('Who won the chess championship?');
@@ -35,4 +36,24 @@ test('works at 360px with keyboard input', async ({ page }) => {
   await page.keyboard.press('Enter');
   await expect(page.getByTestId('answer')).toContainText('cannot follow');
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+});
+
+test('answers realistic delivery questions and falls back on payment safety', async ({ page }) => {
+  await page.goto('./');
+  for (const [question, source] of [
+    ['How much is delivery?', 'ship-02'],
+    ['Do you ship abroad?', 'ship-03'],
+    ['Can someone else act as the recipient of my gift?', 'gift-02'],
+  ]) {
+    await page.getByLabel('Your question').fill(question);
+    await page.getByRole('button', { name: /Send question/ }).click();
+    await expect(page.locator('.exchange').last().getByText(source, { exact: true })).toBeVisible();
+    await expect(page.getByTestId('answer').last()).not.toContainText('cannot follow');
+    await expect(page.getByTestId('answer').last()).not.toContainText('[');
+  }
+  await page.getByLabel('Your question').fill('Is it safe to pay by card?');
+  await page.getByRole('button', { name: /Send question/ }).click();
+  await expect(page.getByTestId('answer').last()).toContainText('not covered');
+  await expect(page.getByTestId('answer').last()).toContainText('contact form');
+  await expect(page.locator('.exchange').last().locator('details')).toHaveCount(0);
 });

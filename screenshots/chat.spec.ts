@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 for (const [question, file, text] of [
-  ['How long does shipping take?', '01-answer.png', '[ship-01]'],
+  ['How long does shipping take?', '01-answer.png', 'We do not dispatch on weekends.'],
   ['Who won the chess championship?', '02-not-covered.png', 'does not send contact requests.'],
 ])
   test(file, async ({ page }) => {
