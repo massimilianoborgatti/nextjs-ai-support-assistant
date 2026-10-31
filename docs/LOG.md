@@ -30,3 +30,12 @@
 - Preserved all previous evaluation cases and added the new recall and unsupported-topic cases: 44 realistic questions now pass.
 - Distinguished confident matches, ambiguous matches and unrelated questions. Ambiguity streams a short clarification with two title buttons; selecting a title asks a follow-up question. Both browser mock and server mode share this behavior, without calling the provider for clarification.
 - Verified 76 unit tests, including generic requires behavior, clarification buttons and server clarification routing. Formatting, lint, strict type checking, both builds and four static browser checks passed.
+
+## 2026-10-31 — Phrase boundaries and specific evidence
+
+- Multi-word tags are independent normalized phrases. Matching retains word order and internal stop words, so a phrase cannot match isolated, reordered or separated component words. Context requirements use the same phrase boundaries.
+- Generic vocabulary such as plant, order, send, get, add, help, need and want cannot admit an entry by itself. A specific title term, specific single-word tag or complete intent phrase is required. An explicit intent phrase can carry meaning that its individual generic words do not; weak body overlap only ranks candidates already admitted by specific evidence.
+- Deduplicated normalized evidence and retained the score margin and clarification path. No entry identifiers, country lists or complete-question branches are embedded in retrieval logic.
+- Replaced the destination-specific tag with general shipping-area concepts and direction phrases. Expanded contact, tracking, damage and collection concepts with context requirements that distinguish human contact, parcel location, pickup by another person and changes to a delivery recipient or address.
+- Kept all 44 earlier evaluation questions and added 12 independently worded questions spanning care, support, collection, delivery changes, gifts, refunds and unsupported generic requests. Added 14 intent-concept questions and direct checks for phrase fragments, reordered words, separated requirements and generic-only input.
+- Verified 105 unit tests, formatting, lint, type checking, both production builds and five static browser checks. No real provider calls were made.
