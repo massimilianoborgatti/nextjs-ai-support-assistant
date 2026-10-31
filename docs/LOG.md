@@ -22,3 +22,11 @@
 - Removed raw citation ids from mock answers and buffered split citation fragments in provider streams. Source cards still use retrieved citation ids.
 - Verified 58 unit tests and three static browser checks, formatting, lint, type checking, server build and static export. Added browser regressions for realistic delivery questions, gift recipients, payment fallback and hidden citation ids.
 - Regenerated both 1600 × 1200 portfolio screenshots after changing visible answer text.
+
+## 2026-10-31 — Context requirements and clarification
+
+- Moved context restrictions into optional FAQ requires terms, with normalized matching against any required term. Retrieval contains no hard-coded entry identifiers.
+- Kept quantity phrasing distinct from cost intent and added data-driven topic requirements for delivery pricing. Expanded FAQ synonyms for arrivals, destinations, returns, order additions, gift messages, contact options and pickup.
+- Preserved all previous evaluation cases and added the new recall and unsupported-topic cases: 44 realistic questions now pass.
+- Distinguished confident matches, ambiguous matches and unrelated questions. Ambiguity streams a short clarification with two title buttons; selecting a title asks a follow-up question. Both browser mock and server mode share this behavior, without calling the provider for clarification.
+- Verified 76 unit tests, including generic requires behavior, clarification buttons and server clarification routing. Formatting, lint, strict type checking, both builds and four static browser checks passed.
