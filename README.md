@@ -14,9 +14,9 @@ Question → keyword retrieval → up to three FAQ entries
                        streamed answer + sources
 ```
 
-Twenty original entries cover the fictional Demo Plant Shop. Retrieval scores titles, tags and bodies, removes stop words, normalizes simple plurals and sorts ties by entry id. The mock quotes its best entry. Unsupported questions receive a contact suggestion; obvious instruction overrides are refused.
+Twenty original entries cover the fictional Demo Plant Shop. Retrieval scores titles, tags and bodies, removes stop words, normalizes common word forms and pickup phrasing, and prefers title and tag matches. A clear score margin is required; ambiguous or unsupported questions use the contact fallback. Pet safety requires animal context. The mock quotes its best entry. Unsupported questions receive a contact suggestion; obvious instruction overrides are refused.
 
-The server prompt separates rules from delimited FAQ data and user input. Prompt boundaries are not a guarantee against every injection or unsupported claim. Sources include only retrieved ids cited in the answer. Evaluate model answers before consequential use.
+The server prompt separates rules from delimited FAQ data and user input. Prompt boundaries are not a guarantee against every injection or unsupported claim. Sources include only retrieved ids cited in the answer. Citation ids are removed from visible text, including ids split across streamed chunks; expandable source cards remain available. Evaluate model answers before consequential use.
 
 ## Run locally
 

@@ -12,3 +12,13 @@
 - TypeScript 7 performs command-line checks; the TypeScript 6 compatibility API supports lint and build tooling.
 - Production dependency audit reports zero vulnerabilities. The full audit reports 15 moderate transitive lint-tool findings associated with minimatch; upstream dependency updates remain necessary.
 - Next: run remote CI and verify the deployed demo after integration.
+
+## 2026-10-31 — Answer relevance and source presentation
+
+- Normalized shipping, delivery, opening, payment, cancellation, collection and pickup word forms; expanded FAQ tags for realistic questions.
+- Prioritized title and tag evidence with keyword specificity, required a clear margin, and rejected generic animal-safety matches without animal context.
+- Added a 30-question retrieval evaluation including delivery costs, international delivery, pickup, opening hours, damaged arrivals, cancellation, gift recipients and unsupported payment questions.
+- Narrowed override detection to explicit attempts while allowing legitimate recipient questions.
+- Removed raw citation ids from mock answers and buffered split citation fragments in provider streams. Source cards still use retrieved citation ids.
+- Verified 58 unit tests and three static browser checks, formatting, lint, type checking, server build and static export. Added browser regressions for realistic delivery questions, gift recipients, payment fallback and hidden citation ids.
+- Regenerated both 1600 × 1200 portfolio screenshots after changing visible answer text.
