@@ -85,3 +85,22 @@ test('clarifies ambiguous questions and follows the chosen title', async ({ page
     page.locator('.exchange').last().getByText('care-02', { exact: true }),
   ).toBeVisible();
 });
+
+test('generic requests stay unanswered while specific support intents show their sources', async ({
+  page,
+}) => {
+  await page.goto('./');
+  await page.getByRole('textbox', { name: 'Your question', exact: true }).fill('I ordered a plant');
+  await page.getByRole('button', { name: /Send question/ }).click();
+  await expect(page.getByTestId('answer')).toContainText('does not send contact requests.');
+  await expect(page.locator('.exchange').last().locator('details')).toHaveCount(0);
+  for (const [question, id] of [
+    ["Where's my parcel?", 'ship-04'],
+    ['Can another person pick up my order?', 'pickup-02'],
+    ['Can delivery go to another address?', 'order-01'],
+  ]) {
+    await page.getByRole('textbox', { name: 'Your question', exact: true }).fill(question);
+    await page.getByRole('button', { name: /Send question/ }).click();
+    await expect(page.locator('.exchange').last().getByText(id, { exact: true })).toBeVisible();
+  }
+});

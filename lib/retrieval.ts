@@ -20,71 +20,88 @@ for (const [root, variants] of Object.entries({
   damage: ['damage', 'damages', 'damaged', 'broken'],
   repot: ['repot', 'repotting', 'repotted'],
   time: ['time', 'times', 'duration', 'long'],
+  leaf: ['leaf', 'leaves'],
+  order: ['order', 'orders', 'ordered', 'ordering'],
+  arrive: ['arrive', 'arrives', 'arrived', 'arriving'],
+  country: ['country', 'countries'],
+  send: ['send', 'sending', 'sent'],
   cost: ['cost', 'costs', 'price', 'prices', 'fee', 'fees'],
   pet: ['pet', 'pets', 'animal', 'animals', 'cat', 'cats', 'dog', 'dogs'],
 }))
   for (const variant of variants) forms[variant] = root;
-export function tokens(text: string) {
-  const words =
+
+// General vocabulary is context, not evidence for a particular FAQ answer.
+const generic = new Set(
+  'plant order send get add help need want take tell something purchase gift care leaf leaves'.split(
+    ' ',
+  ),
+);
+function words(text: string): string[] {
+  return (
     text
       .toLowerCase()
-      .replace(/\bpick[ -]+up\b/g, 'pickup')
-      .match(/[a-z0-9]+/g) ?? [];
-  return [
-    ...new Set(
-      words
-        .filter((word) => !stop.has(word))
-        .map(
-          (word) =>
-            forms[word] ?? (word.length > 4 && word.endsWith('s') ? word.slice(0, -1) : word),
-        ),
-    ),
-  ];
+      .replace(/\b(where|what|when|who|how)['’]s\b/g, '$1 is')
+      .replace(/\bpick(?:[ -]+it)?[ -]+up\b/g, 'pickup')
+      .match(/[a-z0-9]+/g) ?? []
+  ).map(
+    (word) => forms[word] ?? (word.length > 4 && word.endsWith('s') ? word.slice(0, -1) : word),
+  );
+}
+export function tokens(text: string) {
+  return [...new Set(words(text).filter((word) => !stop.has(word)))];
+}
+function containsPhrase(question: string[], phrase: string[]) {
+  return (
+    phrase.length > 0 &&
+    question.some((_, index) => phrase.every((word, offset) => question[index + offset] === word))
+  );
 }
 export type RetrievalResult =
   { kind: 'match'; entries: Faq[] } | { kind: 'ambiguous'; choices: Faq[] } | { kind: 'none' };
 export function searchFaq(question: string, entries: Faq[] = faq): RetrievalResult {
-  const query = tokens(question);
-  const indexed = entries.map((entry) => ({
-    entry,
-    title: tokens(entry.title),
-    tags: tokens(entry.tags.join(' ')),
-    body: tokens(entry.body),
-  }));
+  const sequence = words(question),
+    query = tokens(question);
+  const indexed = entries.map((entry) => {
+    const features = new Map<string, { phrase: string[]; weight: number }>();
+    for (const term of tokens(entry.title))
+      if (!generic.has(term)) features.set(term, { phrase: [term], weight: 5 });
+    for (const tag of entry.tags) {
+      const phrase = words(tag),
+        key = phrase.join(' ');
+      if (!phrase.length || (phrase.length === 1 && (generic.has(key) || stop.has(key)))) continue;
+      if (!features.has(key)) features.set(key, { phrase, weight: phrase.length > 1 ? 6 : 4 });
+    }
+    return { entry, features, body: tokens(entry.body) };
+  });
   const scored = indexed
-    .map(({ entry, title, tags, body }) => {
+    .map(({ entry, features, body }) => {
       if (
         entry.requires?.length &&
-        !tokens(entry.requires.join(' ')).some((term) => query.includes(term))
+        !entry.requires.some((term) => containsPhrase(sequence, words(term)))
       )
-        return { entry, score: 0, strong: 0, matched: [] as string[] };
-      let strong = 0;
-      const matched: string[] = [];
-      const score = query.reduce((total, word) => {
-        const frequency = indexed.filter(
-          (item) => item.title.includes(word) || item.tags.includes(word),
-        ).length;
-        const specificity = 1 + Math.log((entries.length + 1) / (frequency + 1));
-        const match = title.includes(word) || tags.includes(word);
-        if (match) {
-          strong++;
-          matched.push(word);
-        }
-        return (
-          total +
-          (match ? (title.includes(word) ? 5 : 4) * specificity : body.includes(word) ? 0.25 : 0)
-        );
-      }, 0);
-      return { entry, score, strong, matched };
+        return { entry, score: 0, matched: [] as string[] };
+      const matched = [...features.keys()].filter((key) =>
+        containsPhrase(sequence, features.get(key)!.phrase),
+      );
+      const score =
+        matched.reduce((total, key) => {
+          const frequency = indexed.filter((item) => item.features.has(key)).length;
+          return (
+            total +
+            features.get(key)!.weight * (1 + Math.log((entries.length + 1) / (frequency + 1)))
+          );
+        }, 0) +
+        query.filter((word) => !generic.has(word) && body.includes(word)).length * 0.25;
+      return { entry, score, matched };
     })
-    .filter((item) => item.strong > 0 && item.score >= 4)
+    .filter((item) => item.matched.length > 0 && item.score >= 4)
     .sort((a, b) => b.score - a.score || a.entry.id.localeCompare(b.entry.id));
   const best = scored[0],
     second = scored[1];
   if (!best) return { kind: 'none' };
   if (
     second &&
-    ((best.strong === 1 && best.matched.join() === second.matched.join()) ||
+    ((best.matched.length === 1 && best.matched.join() === second.matched.join()) ||
       best.score - second.score < Math.max(2, best.score * 0.15))
   )
     return { kind: 'ambiguous', choices: [best.entry, second.entry] };
