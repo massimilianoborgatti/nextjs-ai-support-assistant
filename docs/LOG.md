@@ -39,3 +39,8 @@
 - Replaced the destination-specific tag with general shipping-area concepts and direction phrases. Expanded contact, tracking, damage and collection concepts with context requirements that distinguish human contact, parcel location, pickup by another person and changes to a delivery recipient or address.
 - Kept all 44 earlier evaluation questions and added 12 independently worded questions spanning care, support, collection, delivery changes, gifts, refunds and unsupported generic requests. Added 14 intent-concept questions and direct checks for phrase fragments, reordered words, separated requirements and generic-only input.
 - Verified 105 unit tests, formatting, lint, type checking, both production builds and five static browser checks. No real provider calls were made.
+
+## 2026-11-09 — Home page social preview
+
+- Added Open Graph and Twitter Card metadata to the Pages export using the App Router Metadata API. The preview uses a 1200 × 630 crop of the existing shipping-answer screenshot.
+- Added a CI check that builds Pages and verifies the static HTML tags, published URLs, and PNG dimensions in the export.
