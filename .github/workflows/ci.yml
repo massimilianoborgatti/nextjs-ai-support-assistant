@@ -20,6 +20,6 @@ jobs:
       - run: npm run lint
       - run: npm run typecheck
       - run: npm test
-      - run: npm run build:pages
+      - run: npm run test:pages-metadata
       - run: npx playwright install --with-deps chromium
       - run: npm run e2e

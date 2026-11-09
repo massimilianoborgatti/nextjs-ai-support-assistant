@@ -18,6 +18,7 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
+    "test:pages-metadata": "npm run build:pages && node --test tests/pages-metadata.test.mjs",
     "e2e": "playwright test",
     "screenshots": "playwright test --config playwright.screenshots.config.ts"
   },
