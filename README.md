@@ -1,10 +1,21 @@
-# Demo Plant Shop — Help center assistant
+# Next.js AI Support Assistant
 
-A small Next.js help-center assistant that answers only from the shop's own FAQ, keeps the API key on the server, and shows its sources. The public demo uses deterministic simulated responses entirely in the browser. A separate local server mode connects the same retrieval pipeline to a configurable provider.
+**Demo Plant Shop help center**
+
+![The Demo Plant Shop assistant answering a shipping question with an expandable FAQ source](docs/screenshots/01-answer.png)
 
 [Live demo](https://massimilianoborgatti.github.io/nextjs-ai-support-assistant/) · [Repository](https://github.com/massimilianoborgatti/nextjs-ai-support-assistant)
 
+## What this demonstrates
+
+- Answers based only on the shop's FAQ, with expandable source cards.
+- Server-side API key handling, a rate limit, a request timeout and generic error messages.
+- A contact fallback for off-topic questions and refusals for obvious instruction overrides.
+- A full test suite and CI that run without credentials or provider calls.
+
 ## How it works
+
+The public demo uses deterministic simulated responses entirely in the browser. A separate local server mode connects the same retrieval pipeline to a configurable provider.
 
 ```text
 Question → keyword retrieval → up to three FAQ entries
@@ -14,11 +25,27 @@ Question → keyword retrieval → up to three FAQ entries
                        streamed answer + sources
 ```
 
-Twenty original entries cover the fictional Demo Plant Shop. Retrieval normalizes common word forms and pickup phrasing. Multi-word tags and context requirements match contiguous phrases, retaining internal stop words. Generic words cannot select an entry by themselves; an explicit topic term or complete intent phrase must match a title or tag. Body overlap is only weak secondary evidence for candidates already admitted by specific title or tag matches. A clear score margin is required; ambiguous questions offer two FAQ titles to choose from, while unrelated questions use the contact fallback. Optional `requires` terms in FAQ data constrain context-sensitive entries. Quantity phrasing is kept separate from price intent. The mock quotes its best entry. Unsupported questions receive a contact suggestion; obvious instruction overrides are refused.
-
 The server prompt separates rules from delimited FAQ data and user input. Prompt boundaries are not a guarantee against every injection or unsupported claim. Sources include only retrieved ids cited in the answer. Citation ids are removed from visible text, including ids split across streamed chunks; expandable source cards remain available. Evaluate model answers before consequential use.
 
-## Run locally
+## Retrieval details
+
+- Twenty original FAQ entries cover the fictional shop. Retrieval normalizes common word forms and pickup phrasing while keeping quantity questions distinct from price questions.
+- Multi-word tags and optional `requires` terms match contiguous phrases, including internal stop words. The `requires` terms constrain entries that depend on context.
+- A specific topic term or full intent phrase must match a title or tag. Generic words cannot select an entry on their own. Body overlap has a small effect on ranking after an entry qualifies.
+- A confident match requires a clear score margin. Ambiguous questions offer two FAQ titles to choose from. Unrelated and unsupported questions get the contact fallback.
+- The browser mock quotes the top FAQ entry. Obvious instruction overrides receive a refusal.
+
+## Evaluation
+
+On the fixtures in [the retrieval evaluation](tests/retrieval-eval.test.ts), all 70 labeled questions matched their expected outcome. The expected FAQ entry ranked first for 55 questions, and 15 correctly returned no top entry. The same file also checks normalization, ambiguity, context requirements and refusals.
+
+```sh
+npm test -- tests/retrieval-eval.test.ts
+```
+
+## Development
+
+### Run locally
 
 Use Node.js 24 LTS and npm.
 
@@ -38,7 +65,7 @@ npm start
 
 The normal build includes `POST /api/assist`. It validates questions, applies a shared process-local limit of ten requests per minute, sets a twenty-second timeout and returns generic errors with no-store headers. The shared bucket is conservative for local use; forwarded client headers are not trusted.
 
-## Static demo
+### Static demo
 
 ```sh
 npm run build:pages
@@ -47,7 +74,7 @@ npm run preview
 
 Open http://127.0.0.1:4500/nextjs-ai-support-assistant/. The export excludes TypeScript route handlers using page extensions and renders the browser mock regardless of server environment settings. Run a normal build again before `npm start`.
 
-## Tests
+### Tests
 
 ```sh
 npm run format:check
@@ -73,10 +100,12 @@ CI checks pull requests and main pushes without secrets. Pages deploys only afte
 - Log duration and status, avoiding questions and personal information.
 - Obtain consent before sending personal data to a provider. Visitors are asked to omit personal and payment details. Response storage is disabled, but provider retention policies still need review.
 - Implement `AnswerGenerator` to swap providers. The server adapter streams Responses API text deltas: [streaming documentation](https://developers.openai.com/api/docs/guides/streaming-responses).
-- Add retrieval evaluation, citation validation and human escalation for real support. Keyword relevance does not establish that every part of a question is covered. The mock is an extractive demonstration.
+- Evaluate retrieval on representative support questions, validate citations and add human escalation for real support. Keyword relevance does not establish that every part of a question is covered. The mock is an extractive demonstration.
 
 ## Stack and license
 
 Next.js App Router, React, strict TypeScript, Vitest, React Testing Library, Playwright, ESLint and Prettier. Versions are recorded in `package-lock.json`.
 
-[MIT](LICENSE) · [massimilianoborgatti](https://github.com/massimilianoborgatti)
+[MIT](LICENSE)
+
+Built by Massimiliano Borgatti — [LinkedIn](https://www.linkedin.com/in/massimilianoborgatti/)
